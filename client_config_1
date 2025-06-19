@@ -1,0 +1,18 @@
+#Client Side Config File
+
+sybase_config = {
+    "Driver":"",
+    "host":"",
+    "server":"",
+    "uid":"",
+    "pwd":"",
+    "Database":"",
+    "clientid":"",
+    "port":""
+}
+
+rabbitmq_config = {
+    "host":"",
+    "user":"",
+    "password":""
+}
