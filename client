@@ -1,0 +1,34 @@
+import sys
+import os
+from client_functions import load_config, connect_rabbitmq, log_message, create_rabbitmq_callback
+
+if __name__ == '__main__':
+    # Load configuration
+    sybase_config, rabbitmq_config = load_config()
+
+    # License Key for authentication
+    license_key = (
+        "Company="
+        "Application="
+        "Signature="
+    )
+
+    client_id = sybase_config['clientid']
+    request_queue_name = f"client_{client_id}_request"
+
+    # Set up RabbitMQ connection and start consuming messages
+    connection, channel = connect_rabbitmq(rabbitmq_config)
+    channel.queue_declare(queue=request_queue_name, durable=True)
+    log_message(f"Waiting for query message on queue: {request_queue_name}")
+
+    # Set up callback function
+    callback_function = create_rabbitmq_callback(client_id=client_id, sybase_config=sybase_config, license_key=license_key, rabbitmq_config=rabbitmq_config)
+
+    # Start consuming messages
+    channel.basic_consume(queue=request_queue_name, on_message_callback=callback_function)
+    try:
+        channel.start_consuming()
+    except KeyboardInterrupt:
+        log_message("Interrupted. Closing connections...")
+        channel.start_consuming()
+        connection.close()
